@@ -1,0 +1,14 @@
+{
+  "name": "3d-test",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev" : "npx parcel src/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.139.2"
+  }
+}
