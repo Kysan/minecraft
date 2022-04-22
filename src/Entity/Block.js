@@ -10,7 +10,7 @@ class Block extends Mesh {
    * @param {number} z
    * @param {ColorRepresentation} color
    */
-  constructor(x, y, z, color) {
+  constructor(x, y, z, textureName) {
     const textures = TxLoader._textures_.dirt;
     super(new BoxGeometry(1, 1, 1), textures);
     this.position.x = x;

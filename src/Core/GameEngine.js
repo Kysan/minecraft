@@ -1,14 +1,18 @@
-import * as THREE from "three";
+import { PerspectiveCamera } from "three";
+import { WebGLRenderer } from "three";
+import { Scene } from "three";
 
 import InputManger from "./InputManager";
+import Random from "./Random";
 
 class GameEngine {
   constructor() {
-    this.scene = new THREE.Scene();
+    this.scene = new Scene();
     this.keys = new InputManger(true);
     this.camera = this.getCamera();
-
+    this.rng = new Random();
     this.renderer = this.getRenderer();
+    this.init();
 
     let lastT = 0;
     const raf = (t) => {
@@ -20,12 +24,10 @@ class GameEngine {
       this.renderer.render(this.scene, this.camera);
     };
     raf();
-
-    this.init();
   }
 
   getCamera() {
-    const camera = new THREE.PerspectiveCamera(
+    const camera = new PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       1,
@@ -46,7 +48,7 @@ class GameEngine {
   }
 
   getRenderer() {
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 

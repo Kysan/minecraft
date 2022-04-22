@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev" : "npx parcel src/index.html"
+    "dev": "npx parcel src/index.html"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "noisejs": "^2.1.0",
     "three": "^0.139.2"
   }
 }
