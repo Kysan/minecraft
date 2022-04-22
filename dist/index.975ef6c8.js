@@ -547,6 +547,7 @@ var _gameEngineDefault = parcelHelpers.interopDefault(_gameEngine);
 var _three = require("three");
 var _skyBox = require("./Entity/SkyBox");
 var _skyBoxDefault = parcelHelpers.interopDefault(_skyBox);
+var _improvedNoise = require("three/examples/jsm/math/ImprovedNoise");
 // v € [0; 1]
 class MyMath {
     // pas bon corrigé
@@ -556,6 +557,7 @@ class MyMath {
 }
 class Random {
     constructor(){
+        this.noiser = new _improvedNoise.ImprovedNoise();
         // a modifier pour rajouter un syteme de seed
         // http://sdz.tdct.org/sdz/bruit-de-perlin.html
         this.data = new Map();
@@ -564,6 +566,9 @@ class Random {
         const id = x + "." + y;
         if (!this.data.has(id)) this.data.set(id, Math.random() * 4);
         return this.data.get(id);
+    }
+    improvedNoise(x, y) {
+        return this.noiser.noise(x, y).toString();
     }
     noise2D(x, y) {
         /**
@@ -647,10 +652,26 @@ class MyGame extends _gameEngineDefault.default {
         const chunckSize = 10;
         const rng = new Random();
         for(let x = 0; x < chunckSize; ++x)for(let z = 0; z < chunckSize; ++z){
+            const rand = rng.noise2D(x, z);
+            console.log({
+                rand
+            });
             // await new Promise((r) => setTimeout(r, 20));
-            const v = Math.floor(rng.noise2D(x, z));
+            const v = Math.floor(rand);
             const color = 0x00ff00; //Math.floor(Math.random() * 0xffffff);
             const b = new _blockDefault.default(x, v, z, color);
+            this.blocks.push(b);
+            this.scene.add(b);
+        }
+        for(let x3 = 0; x3 < chunckSize; ++x3)for(let z1 = 0; z1 < chunckSize; ++z1){
+            const rand = rng.noise2D(x3, z1);
+            console.log({
+                rand
+            });
+            // await new Promise((r) => setTimeout(r, 20));
+            const v = Math.floor(rand);
+            const color = 0x00ff00; //Math.floor(Math.random() * 0xffffff);
+            const b = new _blockDefault.default(x3 + chunckSize, 0, z1, color);
             this.blocks.push(b);
             this.scene.add(b);
         }
@@ -664,9 +685,9 @@ class MyGame extends _gameEngineDefault.default {
     y: ${Math.round(camera.position.y, 3)}
     z: ${Math.round(camera.position.z, 3)}`;
         if (keys.isDown("z")) {
-            camera.position.x += dir.x * delta * 10;
-            camera.position.y += dir.y * delta * 10;
-            camera.position.z += dir.z * delta * 10;
+            camera.position.x += dir.x * delta * 1.5;
+            camera.position.y += dir.y * delta * 1.5;
+            camera.position.z += dir.z * delta * 1.5;
         }
         if (keys.isDown("s")) {
             dir.negate();
@@ -692,7 +713,7 @@ class MyGame extends _gameEngineDefault.default {
 }
 exports.default = MyGame;
 
-},{"./Entity/Block":"iKOe3","./Core/GameEngine":"jL9cb","three":"ktPTu","./Entity/SkyBox":"8jUdA","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}],"iKOe3":[function(require,module,exports) {
+},{"./Entity/Block":"iKOe3","./Core/GameEngine":"jL9cb","three":"ktPTu","./Entity/SkyBox":"8jUdA","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","three/examples/jsm/math/ImprovedNoise":"ixVN5"}],"iKOe3":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _three = require("three");
@@ -30661,6 +30682,296 @@ class SkyBox extends _three.Mesh {
 }
 exports.default = SkyBox;
 
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","../Core/TxLoader":"kaXnE"}]},["7iuLI","8lqZg"], "8lqZg", "parcelRequirece4b")
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","../Core/TxLoader":"kaXnE"}],"ixVN5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "ImprovedNoise", ()=>ImprovedNoise
+);
+// https://cs.nyu.edu/~perlin/noise/
+const _p = [
+    151,
+    160,
+    137,
+    91,
+    90,
+    15,
+    131,
+    13,
+    201,
+    95,
+    96,
+    53,
+    194,
+    233,
+    7,
+    225,
+    140,
+    36,
+    103,
+    30,
+    69,
+    142,
+    8,
+    99,
+    37,
+    240,
+    21,
+    10,
+    23,
+    190,
+    6,
+    148,
+    247,
+    120,
+    234,
+    75,
+    0,
+    26,
+    197,
+    62,
+    94,
+    252,
+    219,
+    203,
+    117,
+    35,
+    11,
+    32,
+    57,
+    177,
+    33,
+    88,
+    237,
+    149,
+    56,
+    87,
+    174,
+    20,
+    125,
+    136,
+    171,
+    168,
+    68,
+    175,
+    74,
+    165,
+    71,
+    134,
+    139,
+    48,
+    27,
+    166,
+    77,
+    146,
+    158,
+    231,
+    83,
+    111,
+    229,
+    122,
+    60,
+    211,
+    133,
+    230,
+    220,
+    105,
+    92,
+    41,
+    55,
+    46,
+    245,
+    40,
+    244,
+    102,
+    143,
+    54,
+    65,
+    25,
+    63,
+    161,
+    1,
+    216,
+    80,
+    73,
+    209,
+    76,
+    132,
+    187,
+    208,
+    89,
+    18,
+    169,
+    200,
+    196,
+    135,
+    130,
+    116,
+    188,
+    159,
+    86,
+    164,
+    100,
+    109,
+    198,
+    173,
+    186,
+    3,
+    64,
+    52,
+    217,
+    226,
+    250,
+    124,
+    123,
+    5,
+    202,
+    38,
+    147,
+    118,
+    126,
+    255,
+    82,
+    85,
+    212,
+    207,
+    206,
+    59,
+    227,
+    47,
+    16,
+    58,
+    17,
+    182,
+    189,
+    28,
+    42,
+    223,
+    183,
+    170,
+    213,
+    119,
+    248,
+    152,
+    2,
+    44,
+    154,
+    163,
+    70,
+    221,
+    153,
+    101,
+    155,
+    167,
+    43,
+    172,
+    9,
+    129,
+    22,
+    39,
+    253,
+    19,
+    98,
+    108,
+    110,
+    79,
+    113,
+    224,
+    232,
+    178,
+    185,
+    112,
+    104,
+    218,
+    246,
+    97,
+    228,
+    251,
+    34,
+    242,
+    193,
+    238,
+    210,
+    144,
+    12,
+    191,
+    179,
+    162,
+    241,
+    81,
+    51,
+    145,
+    235,
+    249,
+    14,
+    239,
+    107,
+    49,
+    192,
+    214,
+    31,
+    181,
+    199,
+    106,
+    157,
+    184,
+    84,
+    204,
+    176,
+    115,
+    121,
+    50,
+    45,
+    127,
+    4,
+    150,
+    254,
+    138,
+    236,
+    205,
+    93,
+    222,
+    114,
+    67,
+    29,
+    24,
+    72,
+    243,
+    141,
+    128,
+    195,
+    78,
+    66,
+    215,
+    61,
+    156,
+    180
+];
+for(let i = 0; i < 256; i++)_p[256 + i] = _p[i];
+function fade(t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+}
+function lerp(t, a, b) {
+    return a + t * (b - a);
+}
+function grad(hash, x, y, z) {
+    const h = hash & 15;
+    const u = h < 8 ? x : y, v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+    return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
+}
+class ImprovedNoise {
+    noise(x, y, z) {
+        const floorX = Math.floor(x), floorY = Math.floor(y), floorZ = Math.floor(z);
+        const X = floorX & 255, Y = floorY & 255, Z = floorZ & 255;
+        x -= floorX;
+        y -= floorY;
+        z -= floorZ;
+        const xMinus1 = x - 1, yMinus1 = y - 1, zMinus1 = z - 1;
+        const u = fade(x), v = fade(y), w = fade(z);
+        const A = _p[X] + Y, AA = _p[A] + Z, AB = _p[A + 1] + Z, B = _p[X + 1] + Y, BA = _p[B] + Z, BB = _p[B + 1] + Z;
+        return lerp(w, lerp(v, lerp(u, grad(_p[AA], x, y, z), grad(_p[BA], xMinus1, y, z)), lerp(u, grad(_p[AB], x, yMinus1, z), grad(_p[BB], xMinus1, yMinus1, z))), lerp(v, lerp(u, grad(_p[AA + 1], x, y, zMinus1), grad(_p[BA + 1], xMinus1, y, zMinus1)), lerp(u, grad(_p[AB + 1], x, yMinus1, zMinus1), grad(_p[BB + 1], xMinus1, yMinus1, zMinus1))));
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}]},["7iuLI","8lqZg"], "8lqZg", "parcelRequirece4b")
 
 //# sourceMappingURL=index.975ef6c8.js.map

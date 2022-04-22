@@ -12,6 +12,8 @@ import { AmbientLight } from "three";
 import { PointLightHelper } from "three";
 import SkyBox from "./Entity/SkyBox";
 
+import { ImprovedNoise } from "three/examples/jsm/math/ImprovedNoise";
+
 // v € [0; 1]
 class MyMath {
   // pas bon corrigé
@@ -22,6 +24,7 @@ class MyMath {
 
 class Random {
   constructor() {
+    this.noiser = new ImprovedNoise();
     // a modifier pour rajouter un syteme de seed
     // http://sdz.tdct.org/sdz/bruit-de-perlin.html
     this.data = new Map();
@@ -31,8 +34,13 @@ class Random {
     const id = x + "." + y;
     if (!this.data.has(id)) {
       this.data.set(id, Math.random() * 4);
+      // this.data.set(id, .noise())
     }
     return this.data.get(id);
+  }
+
+  improvedNoise(x, y) {
+    return this.noiser.noise(x, y).toString();
   }
 
   noise2D(x, y) {
@@ -142,11 +150,27 @@ class MyGame extends GameEngine {
     const rng = new Random();
     for (let x = 0; x < chunckSize; ++x) {
       for (let z = 0; z < chunckSize; ++z) {
+        const rand = rng.noise2D(x, z);
+        console.log({ rand });
         // await new Promise((r) => setTimeout(r, 20));
-        const v = Math.floor(rng.noise2D(x, z));
+        const v = Math.floor(rand);
         const color = 0x00ff00; //Math.floor(Math.random() * 0xffffff);
 
         const b = new Block(x, v, z, color);
+        this.blocks.push(b);
+        this.scene.add(b);
+      }
+    }
+
+    for (let x = 0; x < chunckSize; ++x) {
+      for (let z = 0; z < chunckSize; ++z) {
+        const rand = rng.noise2D(x, z);
+        console.log({ rand });
+        // await new Promise((r) => setTimeout(r, 20));
+        const v = Math.floor(rand);
+        const color = 0x00ff00; //Math.floor(Math.random() * 0xffffff);
+
+        const b = new Block(x + chunckSize, 0, z, color);
         this.blocks.push(b);
         this.scene.add(b);
       }
@@ -165,9 +189,9 @@ class MyGame extends GameEngine {
     z: ${Math.round(camera.position.z, 3)}`;
 
     if (keys.isDown("z")) {
-      camera.position.x += dir.x * delta * 10;
-      camera.position.y += dir.y * delta * 10;
-      camera.position.z += dir.z * delta * 10;
+      camera.position.x += dir.x * delta * 1.5;
+      camera.position.y += dir.y * delta * 1.5;
+      camera.position.z += dir.z * delta * 1.5;
     }
 
     if (keys.isDown("s")) {
