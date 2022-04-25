@@ -142,7 +142,7 @@
       this[globalName] = mainExports;
     }
   }
-})({"7iuLI":[function(require,module,exports) {
+})({"2xZzG":[function(require,module,exports) {
 "use strict";
 var HMR_HOST = null;
 var HMR_PORT = null;
@@ -537,7 +537,7 @@ const game = new _myGameDefault.default(); //
  //   renderer.render(scene, camera);
  // };
 
-},{"./MyGame":"lCDyx","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}],"lCDyx":[function(require,module,exports) {
+},{"./MyGame":"lCDyx","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"lCDyx":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _block = require("./Entity/Block");
@@ -549,18 +549,30 @@ var _skyBox = require("./Entity/SkyBox");
 var _skyBoxDefault = parcelHelpers.interopDefault(_skyBox);
 var _random = require("./Core/Random");
 var _randomDefault = parcelHelpers.interopDefault(_random);
+var _txLoader = require("./Core/TxLoader");
+var _txLoaderDefault = parcelHelpers.interopDefault(_txLoader);
 const CHUNK_SIZE = 20;
 class MyGame extends _gameEngineDefault.default {
     init() {
         this.skybox = new _skyBoxDefault.default(0, 0, 0);
         this.scene.add(this.skybox);
-        this.chunks = new Map();
+        this.scene.add(_block.blockInstancer);
+        let block = new _blockDefault.default(18, 0, 0);
+        // block.remove()
+        let z = 0;
+        // let del = true;
+        setInterval(()=>{
+            let b = new _blockDefault.default(18, 0, z);
+            console.log("new block");
+            z++;
+        }, 2000);
+        // this.chunks = new Map();
         // block au spawn
         this.camera.position.set(18, 15, 23);
-        this.scene.add(new _blockDefault.default(18, 15, 23));
-        this.loadChunk(0, 0);
-        setInterval(()=>this.handleChunks()
-        , 500);
+    // this.scene.add(new Block(18, 15, 23));
+    // const block = new Block(10, 10, 10);
+    // this.loadChunk(0, 0);
+    // setInterval(() => this.handleChunks(), 500);
     }
     /**
    * génére les blocks d'un nouveau chunk (ne les ajoutes pas à la scene)
@@ -633,123 +645,72 @@ class MyGame extends _gameEngineDefault.default {
             cam.position.z += dir.z * delta;
         }
         if (keys.isDown("d")) {
-            dir.cross(cam.up);
+            const angle = Math.atan2(dir.z, dir.x);
+            dir.x = Math.cos(angle + Math.PI / 2);
+            dir.z = Math.sin(angle + Math.PI / 2);
             cam.position.x += dir.x * delta;
             cam.position.y += dir.y * delta;
             cam.position.z += dir.z * delta;
         }
         if (keys.isDown("q")) {
-            dir.cross(cam.up);
-            dir.negate();
+            const angle = Math.atan2(dir.z, dir.x);
+            dir.x = Math.cos(angle - Math.PI / 2);
+            dir.z = Math.sin(angle - Math.PI / 2);
             cam.position.x += dir.x * delta;
             cam.position.y += dir.y * delta;
             cam.position.z += dir.z * delta;
         }
+        if (keys.isDown("Shift")) cam.position.y += delta;
+        if (keys.isDown("Control")) cam.position.y -= delta;
         keys.isDown("f");
     }
 }
 exports.default = MyGame;
 
-},{"./Entity/Block":"iKOe3","./Core/GameEngine":"jL9cb","three":"ktPTu","./Entity/SkyBox":"8jUdA","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","./Core/Random":"1UqDk"}],"iKOe3":[function(require,module,exports) {
+},{"./Entity/Block":"iKOe3","./Core/GameEngine":"jL9cb","three":"ktPTu","./Entity/SkyBox":"8jUdA","./Core/Random":"1UqDk","./Core/TxLoader":"kaXnE","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"iKOe3":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "blockInstancer", ()=>blockInstancer
+);
 var _three = require("three");
 var _txLoader = require("../Core/TxLoader");
 var _txLoaderDefault = parcelHelpers.interopDefault(_txLoader);
-class Block extends _three.Mesh {
+var _instancer = require("./Instancer");
+var _instancerDefault = parcelHelpers.interopDefault(_instancer);
+const blockInstancer = new _instancerDefault.default(new _three.BoxGeometry(1, 1, 1), _txLoaderDefault.default._textures_.dirt);
+class Block extends _three.Object3D {
     /**
    * block de base du jeu
    * @param {number} x
    * @param {number} y
    * @param {number} z
    * @param {ColorRepresentation} color
-   */ constructor(x, y, z, textureName){
-        const textures = _txLoaderDefault.default._textures_.dirt;
-        super(new _three.BoxGeometry(1, 1, 1), textures);
-        this.position.x = x;
-        this.position.y = y;
-        this.position.z = z;
+   */ constructor(x, y, z){
+        this.mat = new _three.Object3D();
+        this.position.set(x, y, z);
+        this.updateMatrix();
+        this.id = blockInstancer.createInstance(this);
+    }
+    set pos({ x , y , z  }) {
+        console.log({
+            x,
+            y,
+            z
+        });
+    }
+    syncWithBuffer() {
+        this.mat.updateMatrix();
+        blockInstancer.updateInstance(this.id, this.matrix);
+        blockInstancer.instanceMatrix.needsUpdate = true;
+    }
+    remove() {
+        blockInstancer.removeInstance(this.id);
+        blockInstancer.instanceMatrix.needsUpdate = true;
     }
 }
 exports.default = Block;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","../Core/TxLoader":"kaXnE","three":"ktPTu"}],"fgKjb":[function(require,module,exports) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, '__esModule', {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
-
-},{}],"kaXnE":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _three = require("three");
-class _TxLoader extends _three.TextureLoader {
-    constructor(){
-        super();
-        this._textures_ = {
-            dirtbackup: this.loadCube("textures/block/dirt", ".bmp", _three.FrontSide),
-            dirt: this.loadCube("textures/block/dirtv2", ".png", _three.FrontSide),
-            sky: this.loadCube("/textures/skybox/clouds1", ".bmp", _three.BackSide)
-        };
-    }
-    load(tx) {
-        return this._textures_[tx];
-    }
-    /**
-   *
-   * @param {string} path chemin d'acces au fichier /Skybox/cloud1
-   * @param {string} ext extension des fichiers '.bmp' '.png'
-   * @returns {Texture}
-   */ loadCube(path, ext, side = _three.FrontSide) {
-        const textures = "north south up down west east".split(" ").map((dir)=>{
-            console.log(`${path}/${dir}${ext}`);
-            const texture = super.load(`${path}/${dir}${ext}`);
-            if (dir == "up") {
-                texture.rotation += Math.PI / 2;
-                texture.center = new _three.Vector2(0.5, 0.5);
-            }
-            if (dir == "down") {
-                texture.rotation += 3 * Math.PI / 2;
-                texture.center = new _three.Vector2(0.5, 0.5);
-            }
-            const mesh = new _three.MeshBasicMaterial({
-                map: texture,
-                side
-            });
-            // mesh.side = BackSide;
-            return mesh;
-        });
-        return textures;
-    }
-}
-const TxLoader = new _TxLoader();
-exports.default = TxLoader;
-
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}],"ktPTu":[function(require,module,exports) {
+},{"three":"ktPTu","../Core/TxLoader":"kaXnE","./Instancer":"g1iro","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"ktPTu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ACESFilmicToneMapping", ()=>ACESFilmicToneMapping
@@ -30518,7 +30479,147 @@ if (typeof window !== 'undefined') {
     else window.__THREE__ = REVISION;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}],"jL9cb":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"2cnbi":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, '__esModule', {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
+
+},{}],"kaXnE":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _three = require("three");
+class _TxLoader extends _three.TextureLoader {
+    constructor(){
+        super();
+        this._textures_ = {
+            dirtbackup: this.loadCube("textures/block/dirt", ".bmp", _three.FrontSide),
+            dirt: this.loadCube("textures/block/dirtv2", ".png", _three.FrontSide),
+            sky: this.loadCube("/textures/skybox/clouds1", ".bmp", _three.BackSide)
+        };
+    }
+    load(tx) {
+        return this._textures_[tx];
+    }
+    /**
+   *
+   * @param {string} path chemin d'acces au fichier /Skybox/cloud1
+   * @param {string} ext extension des fichiers '.bmp' '.png'
+   * @returns {Texture}
+   */ loadCube(path, ext, side = _three.FrontSide) {
+        const textures = "north south up down west east".split(" ").map((dir)=>{
+            console.log(`${path}/${dir}${ext}`);
+            const texture = super.load(`${path}/${dir}${ext}`);
+            if (dir == "up") {
+                texture.rotation += Math.PI / 2;
+                texture.center = new _three.Vector2(0.5, 0.5);
+            }
+            if (dir == "down") {
+                texture.rotation += 3 * Math.PI / 2;
+                texture.center = new _three.Vector2(0.5, 0.5);
+            }
+            const mesh = new _three.MeshBasicMaterial({
+                map: texture,
+                side
+            });
+            // mesh.side = BackSide;
+            return mesh;
+        });
+        return textures;
+    }
+}
+const TxLoader = new _TxLoader();
+exports.default = TxLoader;
+
+},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"g1iro":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _three = require("three");
+var _txLoader = require("../Core/TxLoader");
+var _txLoaderDefault = parcelHelpers.interopDefault(_txLoader);
+class EntityInstancer extends _three.InstancedMesh {
+    /**
+     * 
+     * @param {BufferGeometry} geometry 
+     * @param {Material | Material[]} material nom de l'asset à charger sur le model
+     */ constructor(geometry, material){
+        super(geometry, material, 10000);
+        this.instances = new Set();
+        this.outOfBoundMat = new _three.Matrix4();
+        this.outOfBoundMat.setPosition(new _three.Vector3(-10000, -10000, -10000));
+        this.instanceMatrix.setUsage(_three.DynamicDrawUsage);
+    }
+    /**
+     * 
+     * @returns {number} id unique servant à identifier une instance
+     */ getUniqueId() {
+        for(let id = 0; id < this.count; ++id)if (!this.instances.has(id)) {
+            this.instances.add(id);
+            return id;
+        }
+        throw Error("maximum instance count reach");
+    }
+    /**
+     * 
+     * @param {Matrix4} mat
+     * @returns {number} l'id de l'instance
+     */ createInstance(mat) {
+        const id = this.getUniqueId();
+        const mat_ = new _three.Matrix4();
+        this.setMatrixAt(id, mat_);
+        this.instances.add(id);
+        return id;
+    }
+    /**
+     * 
+     * @param {number} id 
+     * @param {Matrix4} mat 
+     */ updateInstance(id, mat) {
+        super.setMatrixAt(id, mat);
+    }
+    /**
+     * @param {number} id 
+     */ removeInstance(id) {
+        this.instances.delete(id);
+        this.setMatrixAt(id, this.outOfBoundMat);
+    }
+    /**
+     * 
+     * @param {number} id id de l'instance
+     * @returns {Matrix4}
+     */ getInstance(id) {
+        let mat = new _three.Matrix4();
+        this.getMatrixAt(id, mat);
+        return mat;
+    }
+}
+exports.default = EntityInstancer;
+
+},{"three":"ktPTu","../Core/TxLoader":"kaXnE","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"jL9cb":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _three = require("three");
@@ -30575,7 +30676,7 @@ class GameEngine {
 }
 exports.default = GameEngine;
 
-},{"three":"ktPTu","./InputManager":"b2OHS","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","./Random":"1UqDk"}],"b2OHS":[function(require,module,exports) {
+},{"three":"ktPTu","./InputManager":"b2OHS","./Random":"1UqDk","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"b2OHS":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class InputManger {
@@ -30608,7 +30709,7 @@ class InputManger {
 }
 exports.default = InputManger;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}],"1UqDk":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"1UqDk":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _myMath = require("./MyMath");
@@ -30663,7 +30764,7 @@ class Random {
 }
 exports.default = Random;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","./MyMath":"gXreA"}],"gXreA":[function(require,module,exports) {
+},{"./MyMath":"gXreA","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"gXreA":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 class MyMath {
@@ -30674,7 +30775,7 @@ class MyMath {
 }
 exports.default = MyMath;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb"}],"8jUdA":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}],"8jUdA":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _three = require("three");
@@ -30689,6 +30790,6 @@ class SkyBox extends _three.Mesh {
 }
 exports.default = SkyBox;
 
-},{"three":"ktPTu","@parcel/transformer-js/src/esmodule-helpers.js":"fgKjb","../Core/TxLoader":"kaXnE"}]},["7iuLI","8lqZg"], "8lqZg", "parcelRequirece4b")
+},{"three":"ktPTu","../Core/TxLoader":"kaXnE","@parcel/transformer-js/src/esmodule-helpers.js":"2cnbi"}]},["2xZzG","8lqZg"], "8lqZg", "parcelRequirece4b")
 
 //# sourceMappingURL=index.975ef6c8.js.map

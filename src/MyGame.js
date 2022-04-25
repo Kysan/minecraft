@@ -1,4 +1,4 @@
-import Block from "./Entity/Block";
+import Block, { blockInstancer } from "./Entity/Block";
 import GameEngine from "./Core/GameEngine";
 import { Vector3 } from "three";
 import { Mesh } from "three";
@@ -12,6 +12,13 @@ import { AmbientLight } from "three";
 import { PointLightHelper } from "three";
 import SkyBox from "./Entity/SkyBox";
 import Random from "./Core/Random";
+import { InstancedMesh } from "three";
+import { BoxGeometry } from "three";
+import TxLoader from "./Core/TxLoader";
+import { Object3D } from "three";
+import { Vector4 } from "three";
+import { Matrix4 } from "three";
+import { DynamicDrawUsage } from "three";
 
 const CHUNK_SIZE = 20;
 
@@ -19,15 +26,32 @@ class MyGame extends GameEngine {
   init() {
     this.skybox = new SkyBox(0, 0, 0);
     this.scene.add(this.skybox);
+    this.scene.add(blockInstancer);
 
-    this.chunks = new Map();
+    let block = new Block(18, 0, 0);
+    // block.remove()
+    let z = 0;
+    // let del = true;
+    
+
+    setInterval(()=>{
+      let b = new Block(18, 0, z);
+      console.log("new block")
+      z++;
+    }, 2000)
+    // this.chunks = new Map();
 
     // block au spawn
     this.camera.position.set(18, 15, 23);
-    this.scene.add(new Block(18, 15, 23));
+    // this.scene.add(new Block(18, 15, 23));
 
-    this.loadChunk(0, 0);
-    setInterval(() => this.handleChunks(), 500);
+    // const block = new Block(10, 10, 10);
+    
+
+
+
+    // this.loadChunk(0, 0);
+    // setInterval(() => this.handleChunks(), 500);
   }
 
   /**
@@ -151,20 +175,37 @@ class MyGame extends GameEngine {
     }
 
     if (keys.isDown("d")) {
-      dir.cross(cam.up);
+      
+      const angle = Math.atan2(dir.z, dir.x);
+      dir.x = Math.cos(angle+Math.PI/2);
+      dir.z = Math.sin(angle+Math.PI/2);
+
       cam.position.x += dir.x * delta;
       cam.position.y += dir.y * delta;
       cam.position.z += dir.z * delta;
     }
 
     if (keys.isDown("q")) {
-      dir.cross(cam.up);
-      dir.negate();
+
+      const angle = Math.atan2(dir.z, dir.x);
+      dir.x = Math.cos(angle-Math.PI/2);
+      dir.z = Math.sin(angle-Math.PI/2);
+
       cam.position.x += dir.x * delta;
       cam.position.y += dir.y * delta;
       cam.position.z += dir.z * delta;
     }
 
+
+    if(keys.isDown("Shift")) {
+      cam.position.y += delta
+    }
+
+
+
+    if(keys.isDown("Control")) {
+      cam.position.y -= delta;
+    }
     if (keys.isDown("f")) {
       // this.rng = new Random()
       // TODO: regenerer tout les chunks
