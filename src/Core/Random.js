@@ -16,7 +16,10 @@ class Random {
     return this.data.get(id);
   }
 
-  noise2D(x, y) {
+  noise2D(x, y, height, density = 1) {
+
+    x *= density;
+    y *= density;
     /**
      * on a une grille de carre
      * on met un point P à un endroit au hasard
@@ -56,7 +59,7 @@ class Random {
     // 5.4 -> bas(0.6) > haut(0.4)
     const final = MyMath.lerp(qy, p1, p2);
 
-    return final;
+    return final * height;
   }
 }
 

@@ -1,8 +1,10 @@
 import { PerspectiveCamera } from "three";
 import { WebGLRenderer } from "three";
 import { Scene } from "three";
+import InstancerManager, { Instancers } from "../Entity/InstancerManager";
 
 import InputManger from "./InputManager";
+import MyMath from "./MyMath";
 import Random from "./Random";
 
 class GameEngine {
@@ -12,6 +14,7 @@ class GameEngine {
     this.camera = this.getCamera();
     this.rng = new Random();
     this.renderer = this.getRenderer();
+    InstancerManager.linkToScene(this.scene)
     this.init();
 
     let lastT = 0;
@@ -41,9 +44,14 @@ class GameEngine {
   setUpCameraHandlers(camera) {
     camera.rotation.order = "YXZ";
     window.addEventListener("mousemove", ({ x, y, movementX, movementY }) => {
+      const sensitivity = 1 / 200
       const { camera } = this;
-      camera.rotation.y -= movementX / 200;
-      camera.rotation.x -= movementY / 200;
+
+      const rotY = camera.rotation.y - movementX * sensitivity;
+
+      const rotX = camera.rotation.x - movementY * sensitivity
+      camera.rotation.y = rotY;
+      camera.rotation.x = MyMath.clamp(rotX, -Math.PI / 2, Math.PI / 2);
     });
   }
 
@@ -63,7 +71,7 @@ class GameEngine {
     console.log("init");
   }
 
-  update(delta) {}
+  update(delta) { }
 }
 
 export default GameEngine;

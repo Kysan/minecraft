@@ -1,12 +1,13 @@
 import { BoxGeometry } from "three";
 import { Mesh } from "three";
-import TxLoader from "../Core/TxLoader";
+import MyTextures, { BlockType } from "../Core/MyTextureLoader";
+import TxLoader from "../Core/MyTextureLoader";
 
 class SkyBox extends Mesh {
   constructor(x, y, z) {
-    const textures = TxLoader._textures_.sky;
+    const textures = MyTextures.get(BlockType.Sky) as any;
     super(new BoxGeometry(3000, 3000, 3000, 3000), textures);
-    this.position.set(x, y, z);
+    // this.position.set(x, y, z);
   }
 }
 
